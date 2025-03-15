@@ -1,0 +1,15 @@
+# kada se koristi za manipulaciju sa docker-om pa moramo da imamo super user (sudo) dozvole
+sudo: required
+# travisu kazemo da nam treba docker i on ce nam obezbediti da Docker CLI bude spreman u kontejneru
+services:
+  - docker
+# u before_install se dodaju koraci koji trebaju da se izvrse pre pokretanja testova i deploy-a
+# 'docker build -t markoni11/docker-react -f Dockerfile.dev .' - radi se build kontejnera po fajlu Dockerfile.dev i dajemo mu ime da bi mogli da baratamo sa njim. Kada smo kreirali bez imena docker nam je vracao id kontejnera ali sada nemamo moguznost da prihvatimo taj id i da ga prosledimo dalje
+before_install:
+  - docker build -t markoni11/docker-react -f Dockerfile.dev .
+# u script su comande koje trebaju da se izvrse da bi se izvrsili testovi
+# travis prati ono sto se vraca kada se komande izvrse i kada se vrati bilo sta sto se razlikuje od 0 znace da je test pao
+# testovi se pokrecu tako sto se pokrene kontejner i default komanda se overriduje sa komandom koja pokrece testove
+# travis ocekuje da ce se kontejner pokrenuti, testovi izvrsiti i da ce se na kraju prekinuti izvrsavanje testova. kada smo rucno pokretali testove sa 'npm run test' oni su se pokrenuli ali ostajali da rade dok ih rucno ne prekinemo. Zato se dodaje '-- --coverage'
+script:
+  - docker run markoni11/docker-react npm run test -- --coverage
